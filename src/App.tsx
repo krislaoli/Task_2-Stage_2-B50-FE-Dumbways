@@ -1,6 +1,8 @@
 import React from 'react';
 import "./assets/style.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
+import axios from 'axios';
+
 
 interface LocationFormState {
   provinces: any[];
@@ -11,6 +13,8 @@ interface LocationFormState {
   selectedRegency: string;
   selectedDistrict: string;
   selectedVillage: string;
+  loading: boolean;
+  error: string | null;
 }
 
 class LocationForm extends React.Component<{}, LocationFormState> {
@@ -24,41 +28,43 @@ class LocationForm extends React.Component<{}, LocationFormState> {
       selectedProvince: '',
       selectedRegency: '',
       selectedDistrict: '',
-      selectedVillage: ''
+      selectedVillage: '',
+      loading: false,
+      error: null,
     };
   }
 
   componentDidMount() {
-    fetch('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
-      .then(response => response.json())
-      .then(data => this.setState({ provinces: data }));
+    axios.get('https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json')
+      .then(response => this.setState({ provinces: response.data }))
+      .catch(error => this.setState({ error: error.message }));
   }
 
   handleProvinceChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const provinceId = event.target.value;
     this.setState({ selectedProvince: provinceId });
 
-    fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
-      .then(response => response.json())
-      .then(data => this.setState({ regencies: data, selectedRegency: '', districts: [], selectedDistrict: '', villages: [], selectedVillage: '' }));
+    axios.get(`https://www.emsifa.com/api-wilayah-indonesia/api/regencies/${provinceId}.json`)
+      .then(response => this.setState({ regencies: response.data, selectedRegency: '', districts: [], selectedDistrict: '', villages: [], selectedVillage: '' }))
+      .catch(error => this.setState({ error: error.message }));
   }
 
   handleRegencyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const regencyId = event.target.value;
     this.setState({ selectedRegency: regencyId });
 
-    fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`)
-      .then(response => response.json())
-      .then(data => this.setState({ districts: data, selectedDistrict: '', villages: [], selectedVillage: '' }));
+    axios.get(`https://www.emsifa.com/api-wilayah-indonesia/api/districts/${regencyId}.json`)
+      .then(response => this.setState({ districts: response.data, selectedDistrict: '', villages: [], selectedVillage: '' }))
+      .catch(error => this.setState({ error: error.message }));
   }
 
   handleDistrictChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const districtId = event.target.value;
     this.setState({ selectedDistrict: districtId });
 
-    fetch(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`)
-      .then(response => response.json())
-      .then(data => this.setState({ villages: data, selectedVillage: '' }));
+    axios.get(`https://www.emsifa.com/api-wilayah-indonesia/api/villages/${districtId}.json`)
+      .then(response => this.setState({ villages: response.data, selectedVillage: '' }))
+      .catch(error => this.setState({ error: error.message }));
   }
 
   handleVillageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
